@@ -1,0 +1,7 @@
+Flask
+SQLAlchemy
+PyJWT
+cryptography
+python-dotenv
+bcrypt
+pyotp
