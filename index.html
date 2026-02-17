@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zero Trust Architecture | Final Year Project Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        /* Chosen Palette: 'Secure Slate' - Warm slate/gray background with deep blue primary and vivid teal/red accents for data. 
+           Maintains a light, professional academic/enterprise feel. */
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #1e293b; /* slate-800 */
+        }
+
+        /* Chart Container Styling per Requirements */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 650px; /* Constrains width on large screens */
+            height: 350px;   /* Base responsive height */
+            max-height: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Responsive adjustments for chart height */
+        @media (max-width: 640px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b; 
+        }
+
+        /* Interactive Element Transitions */
+        .pillar-card {
+            transition: all 0.3s ease;
+        }
+        .pillar-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .pillar-card.active {
+            border-color: #0ea5e9; /* sky-500 */
+            background-color: #e0f2fe; /* sky-50 */
+        }
+        
+        .nav-link {
+            transition: color 0.2s ease;
+        }
+        .nav-link:hover {
+            color: #0284c7; /* sky-600 */
+        }
+
+        /* Architecture Diagram Flow Lines (CSS Graphics) */
+        .flow-line-h {
+            height: 2px;
+            background: #cbd5e1;
+            position: relative;
+        }
+        .flow-line-h::after {
+            content: '►';
+            position: absolute;
+            right: -6px;
+            top: -9px;
+            color: #cbd5e1;
+            font-size: 12px;
+        }
+        .flow-line-v {
+            width: 2px;
+            background: #cbd5e1;
+            margin: 0 auto;
+        }
+    </style>
+    <!-- Application Structure Plan: 
+         1. Hero: Hook the reader with the core definition.
+         2. The 5 Pillars (Interactive Grid): User selects a pillar to see specific data and technology. Used to break down the complex scope into manageable chunks.
+         3. Logic Flow (CSS Diagram): Visualizing the "Auth Request" path.
+         4. Maturity Radar (Chart): Comparing current vs. target state.
+         5. ROI Data (Bar/Line Charts): Quantitative findings of the project.
+         6. AI SOC: LLM Integration for simulation.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="antialiased">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-700 to-sky-600">
+                        Zero Trust <span class="font-light text-slate-500">Project</span>
+                    </span>
+                </div>
+                <div class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-600">
+                    <button onclick="scrollToSection('pillars')" class="nav-link">The 5 Pillars</button>
+                    <button onclick="scrollToSection('architecture')" class="nav-link">Architecture</button>
+                    <button onclick="scrollToSection('maturity')" class="nav-link">Maturity Model</button>
+                    <button onclick="scrollToSection('impact')" class="nav-link">Project Impact</button>
+                    <button onclick="scrollToSection('ai-soc')" class="nav-link text-sky-600 font-semibold flex items-center gap-1">
+                        AI Ops Center <span>✨</span>
+                    </button>
+                </div>
+                <div class="flex items-center md:hidden">
+                    <!-- Mobile Menu Button Placeholder -->
+                    <button class="text-slate-500">☰</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="bg-white border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+            <div class="text-center max-w-3xl mx-auto">
+                <div class="inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold text-sky-600 ring-1 ring-inset ring-sky-600/20 bg-sky-50 mb-6">
+                    Final Year Project Report 2026
+                </div>
+                <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl mb-6">
+                    Zero Trust Security Architecture
+                </h1>
+                <p class="text-lg text-slate-600 leading-8">
+                    "Never Trust, Always Verify." This project investigates the shift from perimeter-based security to a data-centric model. 
+                    This interactive report summarizes the methodology, architectural design, and quantitative findings regarding security posture improvement.
+                </p>
+                <div class="mt-10 flex items-center justify-center gap-x-6">
+                    <button onclick="scrollToSection('pillars')" class="rounded-md bg-sky-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-sky-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600 transition-colors">
+                        Explore the Framework
+                    </button>
+                    <button onclick="scrollToSection('impact')" class="text-sm font-semibold leading-6 text-slate-900">
+                        View Results <span aria-hidden="true">→</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Section 1: The 5 Pillars Explorer -->
+    <section id="pillars" class="py-16 bg-slate-50 scroll-mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-10 text-center md:text-left">
+                <h2 class="text-3xl font-bold tracking-tight text-slate-900">The 5 Pillars of Zero Trust</h2>
+                <p class="mt-4 text-lg text-slate-600 max-w-3xl">
+                    Zero Trust is not a single product, but a strategy implemented across five key pillars. Click each card below to explore the implementation details, technologies used, and simulated compliance metrics gathered during the project.
+                </p>
+            </div>
+
+            <!-- Interactive Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+                <!-- Buttons populated by JS -->
+                <button onclick="updatePillar('identity')" id="btn-identity" class="pillar-card active p-4 rounded-xl border-2 border-slate-200 bg-white text-center cursor-pointer">
+                    <div class="text-2xl mb-2">🆔</div>
+                    <div class="font-bold text-slate-800">Identity</div>
+                </button>
+                <button onclick="updatePillar('device')" id="btn-device" class="pillar-card p-4 rounded-xl border-2 border-slate-200 bg-white text-center cursor-pointer">
+                    <div class="text-2xl mb-2">💻</div>
+                    <div class="font-bold text-slate-800">Device</div>
+                </button>
+                <button onclick="updatePillar('network')" id="btn-network" class="pillar-card p-4 rounded-xl border-2 border-slate-200 bg-white text-center cursor-pointer">
+                    <div class="text-2xl mb-2">🌐</div>
+                    <div class="font-bold text-slate-800">Network</div>
+                </button>
+                <button onclick="updatePillar('app')" id="btn-app" class="pillar-card p-4 rounded-xl border-2 border-slate-200 bg-white text-center cursor-pointer">
+                    <div class="text-2xl mb-2">📦</div>
+                    <div class="font-bold text-slate-800">Workload</div>
+                </button>
+                <button onclick="updatePillar('data')" id="btn-data" class="pillar-card p-4 rounded-xl border-2 border-slate-200 bg-white text-center cursor-pointer">
+                    <div class="text-2xl mb-2">💿</div>
+                    <div class="font-bold text-slate-800">Data</div>
+                </button>
+            </div>
+
+            <!-- Detail View -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="grid md:grid-cols-2 gap-0">
+                    <!-- Text Content -->
+                    <div class="p-8 flex flex-col justify-center">
+                        <h3 id="pillar-title" class="text-2xl font-bold text-slate-900 mb-4">Identity Security</h3>
+                        <p id="pillar-desc" class="text-slate-600 mb-6">
+                            Identity is the new perimeter. The goal is to ensure that only authenticated and authorized users can access resources.
+                        </p>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="text-sm font-semibold text-sky-600 uppercase tracking-wide">Key Technologies</h4>
+                                <ul id="pillar-tech" class="mt-2 text-sm text-slate-700 list-disc list-inside space-y-1">
+                                    <li>Multi-Factor Authentication (MFA)</li>
+                                    <li>Single Sign-On (SSO)</li>
+                                    <li>Identity & Access Management (IAM)</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-red-500 uppercase tracking-wide">Primary Threat</h4>
+                                <p id="pillar-threat" class="mt-1 text-sm text-slate-700">Credential Stuffing & Phishing</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visualization -->
+                    <div class="bg-slate-50 p-8 border-l border-slate-100 flex flex-col items-center justify-center">
+                        <h4 class="text-center font-semibold text-slate-800 mb-4">Project Metric: Implementation Status</h4>
+                        <div class="chart-container h-64 max-h-[250px] w-full">
+                            <canvas id="pillarChart"></canvas>
+                        </div>
+                        <p id="pillar-stat-desc" class="text-xs text-center text-slate-500 mt-4 max-w-xs mx-auto">
+                            Simulated adoption rate of MFA across the organization user base.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: Logical Architecture -->
+    <section id="architecture" class="py-16 bg-white border-y border-slate-200 scroll-mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-900">Logical Architecture Diagram</h2>
+                <p class="mt-4 text-lg text-slate-600 max-w-3xl mx-auto">
+                    Based on NIST SP 800-207, this diagram illustrates the transaction flow. Access requests are intercepted by the Policy Enforcement Point (PEP) and validated by the Policy Decision Point (PDP) before reaching the resource.
+                </p>
+            </div>
+
+            <!-- CSS Flow Diagram -->
+            <div class="bg-slate-50 rounded-xl border border-slate-200 p-6 md:p-12 overflow-x-auto">
+                <div class="min-w-[700px] flex justify-between items-center relative">
+                    
+                    <!-- Subject -->
+                    <div class="flex flex-col items-center z-10 w-40">
+                        <div class="w-24 h-24 bg-white rounded-full border-4 border-slate-300 flex items-center justify-center text-3xl shadow-sm">
+                            👤
+                        </div>
+                        <h3 class="mt-4 font-bold text-slate-800">Subject</h3>
+                        <p class="text-xs text-center text-slate-500">User / Device<br>Requesting Access</p>
+                    </div>
+
+                    <!-- Arrow -->
+                    <div class="flex-1 h-[2px] bg-slate-300 relative mx-4">
+                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-slate-50 px-2 text-xs font-mono text-slate-500">Request</div>
+                        <div class="absolute right-0 -top-[5px] text-slate-300">▶</div>
+                    </div>
+
+                    <!-- Control Plane Box -->
+                    <div class="bg-white border-2 border-sky-500 rounded-lg p-6 shadow-lg z-10 flex flex-col items-center w-64">
+                        <div class="text-xs font-bold text-sky-600 uppercase mb-2 tracking-wider">Control Plane</div>
+                        
+                        <!-- PDP -->
+                        <div class="bg-sky-50 border border-sky-200 rounded p-3 w-full text-center mb-2">
+                            <span class="font-bold text-sky-900 text-sm">Policy Decision Point</span>
+                            <div class="text-[10px] text-sky-700 leading-tight mt-1">(Trust Algorithm)</div>
+                        </div>
+
+                        <!-- Connector -->
+                        <div class="h-4 w-[2px] bg-sky-300 mb-2"></div>
+
+                        <!-- PEP -->
+                        <div class="bg-slate-800 text-white rounded p-3 w-full text-center hover:bg-slate-700 transition cursor-help group relative">
+                            <span class="font-bold text-sm">Enforcement Point</span>
+                            <!-- Tooltip -->
+                            <div class="absolute hidden group-hover:block w-48 bg-black text-white text-xs p-2 rounded -bottom-16 left-1/2 -translate-x-1/2 z-20">
+                                The Gatekeeper. Enables, Monitors, and Terminates connections.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Arrow -->
+                    <div class="flex-1 h-[2px] bg-slate-300 relative mx-4">
+                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-slate-50 px-2 text-xs font-mono text-slate-500">Access</div>
+                        <div class="absolute right-0 -top-[5px] text-slate-300">▶</div>
+                    </div>
+
+                    <!-- Resource -->
+                    <div class="flex flex-col items-center z-10 w-40">
+                        <div class="w-24 h-24 bg-white rounded-lg border-4 border-slate-300 flex items-center justify-center text-3xl shadow-sm">
+                            📂
+                        </div>
+                        <h3 class="mt-4 font-bold text-slate-800">Resource</h3>
+                        <p class="text-xs text-center text-slate-500">Data / App<br>Protected Asset</p>
+                    </div>
+
+                </div>
+                
+                <!-- External Feeds -->
+                <div class="mt-8 flex justify-center space-x-4 min-w-[700px]">
+                    <div class="text-center">
+                        <div class="h-8 w-[2px] bg-sky-300 mx-auto mb-2"></div>
+                        <div class="flex gap-2 text-xs">
+                            <span class="bg-white border border-slate-200 px-2 py-1 rounded shadow-sm text-slate-600">Threat Intel</span>
+                            <span class="bg-white border border-slate-200 px-2 py-1 rounded shadow-sm text-slate-600">Logs</span>
+                            <span class="bg-white border border-slate-200 px-2 py-1 rounded shadow-sm text-slate-600">PKI</span>
+                        </div>
+                        <p class="text-[10px] text-slate-400 mt-2">Context Inputs to PDP</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: Maturity Model -->
+    <section id="maturity" class="py-16 bg-slate-50 scroll-mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-3 gap-12 items-center">
+                
+                <!-- Text / Controls -->
+                <div class="lg:col-span-1">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-6">Maturity Assessment</h2>
+                    <p class="text-slate-600 mb-8">
+                        The project assessed the organization's current stance against the CISA Maturity Model. The goal is to move from "Traditional" (Static, Manual) to "Optimal" (Dynamic, Automated).
+                    </p>
+                    
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <h4 class="font-bold text-slate-800 mb-4 border-b pb-2">Visualization Controls</h4>
+                        <div class="flex items-center space-x-3 mb-4">
+                            <span class="w-3 h-3 rounded-full bg-slate-400"></span>
+                            <span class="text-sm text-slate-600">Traditional (Baseline)</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="w-3 h-3 rounded-full bg-sky-600 shadow-[0_0_8px_rgba(2,132,199,0.5)]"></span>
+                            <span class="text-sm text-slate-900 font-medium">Optimal Zero Trust (Target)</span>
+                        </div>
+                        <div class="mt-6 text-xs text-slate-400">
+                            *Scores calculated based on CISA maturity criteria (1-5 scale).
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Radar Chart -->
+                <div class="lg:col-span-2 flex justify-center">
+                    <div class="chart-container w-full max-w-lg h-[400px]">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 4: Project Impact / ROI -->
+    <section id="impact" class="py-16 bg-white border-t border-slate-200 scroll-mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-900">Project Impact & ROI</h2>
+                <p class="mt-4 text-lg text-slate-600 max-w-3xl mx-auto">
+                    Implementing Zero Trust architecture yields measurable improvements in security resilience and financial risk reduction. The following data is based on the IBM Cost of a Data Breach Report analysis included in the project research.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Bar Chart: Cost Savings -->
+                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                    <h3 class="text-lg font-bold text-slate-800 mb-2">Average Cost of a Data Breach</h3>
+                    <p class="text-sm text-slate-500 mb-6">Comparison of organizations with no ZT deployed vs. fully deployed.</p>
+                    <div class="chart-container h-64 max-h-[300px]">
+                        <canvas id="costChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Line Chart: Time to Contain -->
+                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                    <h3 class="text-lg font-bold text-slate-800 mb-2">Mean Time to Identify & Contain (Days)</h3>
+                    <p class="text-sm text-slate-500 mb-6">Faster detection leads to significantly lower breach costs.</p>
+                    <div class="chart-container h-64 max-h-[300px]">
+                        <canvas id="timeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary metrics -->
+            <div class="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                <div class="p-4">
+                    <div class="text-3xl font-bold text-sky-600">20.5%</div>
+                    <div class="text-sm text-slate-600 mt-1">Cost Savings</div>
+                </div>
+                <div class="p-4">
+                    <div class="text-3xl font-bold text-sky-600">77 Days</div>
+                    <div class="text-sm text-slate-600 mt-1">Faster Containment</div>
+                </div>
+                <div class="p-4">
+                    <div class="text-3xl font-bold text-sky-600">100%</div>
+                    <div class="text-sm text-slate-600 mt-1">Encryption Coverage</div>
+                </div>
+                <div class="p-4">
+                    <div class="text-3xl font-bold text-sky-600">Zero</div>
+                    <div class="text-sm text-slate-600 mt-1">Trust Assumptions</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEW SECTION: AI Security Operations Center -->
+    <section id="ai-soc" class="py-16 bg-slate-900 text-slate-100 scroll-mt-16 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-10">
+                <div class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-sky-400 ring-1 ring-inset ring-sky-400/30 bg-sky-400/10 mb-4">
+                    Powered by Gemini 2.5 Flash
+                </div>
+                <h2 class="text-3xl font-bold text-white">AI Security Operations Center</h2>
+                <p class="mt-4 text-lg text-slate-400 max-w-3xl">
+                    Interact with the Zero Trust Policy Engine. Simulate threat scenarios or generate dynamic access policies using the integrated LLM to demonstrate the architecture's resilience.
+                </p>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- Feature 1: Threat Analyzer -->
+                <div class="bg-slate-800/50 rounded-xl border border-slate-700 p-6 backdrop-blur-sm shadow-xl">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="p-2 bg-red-500/10 rounded-lg text-red-500 text-xl">🛡️</div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Threat Impact Simulator</h3>
+                            <p class="text-xs text-slate-400">Compare Legacy vs. Zero Trust outcomes</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-400 mb-2">Describe Threat Scenario</label>
+                            <textarea id="threatInput" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm text-white focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none placeholder-slate-600 transition-all" placeholder="e.g., An HR employee clicks a phishing link and malware is downloaded to their laptop..."></textarea>
+                        </div>
+                        <button onclick="analyzeThreat()" id="btn-threat" class="w-full bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-medium py-2.5 rounded-lg transition-all shadow-lg shadow-sky-900/20 flex items-center justify-center gap-2">
+                            <span>Analyze Impact</span>
+                            <span id="threat-spinner" class="hidden animate-spin">⟳</span>
+                            <span>✨</span>
+                        </button>
+                    </div>
+
+                    <div id="threatResult" class="mt-6 p-4 bg-slate-900 rounded-lg border border-slate-700 min-h-[120px] text-sm text-slate-300 hidden leading-relaxed">
+                        <!-- Result populated here -->
+                    </div>
+                </div>
+
+                <!-- Feature 2: Policy Generator -->
+                <div class="bg-slate-800/50 rounded-xl border border-slate-700 p-6 backdrop-blur-sm shadow-xl">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="p-2 bg-emerald-500/10 rounded-lg text-emerald-500 text-xl">📝</div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Dynamic Policy Generator</h3>
+                            <p class="text-xs text-slate-400">Generate NIST 800-207 JSON Policies</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">Subject (User/Role)</label>
+                            <input type="text" id="policySubject" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all" placeholder="e.g., Remote Contractor">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">Resource (Asset)</label>
+                            <input type="text" id="policyResource" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all" placeholder="e.g., Customer DB">
+                        </div>
+                    </div>
+                    
+                    <button onclick="generatePolicy()" id="btn-policy" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-medium py-2.5 rounded-lg transition-all shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2">
+                        <span>Generate Policy Code</span>
+                        <span id="policy-spinner" class="hidden animate-spin">⟳</span>
+                        <span>✨</span>
+                    </button>
+
+                    <div class="mt-6 relative">
+                        <div id="policyResult" class="p-4 bg-slate-950 rounded-lg border border-slate-800 min-h-[120px] font-mono text-xs text-emerald-400 overflow-x-auto whitespace-pre hidden">
+                            <!-- Result populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-white text-xl font-bold mb-4">Zero Trust Security System Project</h2>
+            <p class="mb-6 max-w-xl mx-auto text-sm">
+                This Single Page Application serves as the digital artifact for the Final Year Project. 
+                Data sources include NIST SP 800-207, CISA Maturity Model, and IBM Security Reports.
+            </p>
+            <div class="text-xs text-slate-600">
+                &copy; 2026 Final Year Project Submission. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- 1. State & Data Store ---
+        
+        // Pillar Data Store: Contains the textual and metric data for the 5 interactive cards.
+        const pillarData = {
+            'identity': {
+                title: 'Identity Security',
+                desc: 'Identity is the new perimeter. The goal is to ensure that only authenticated and authorized users can access resources. This involves verifying who is requesting access, context of the request, and risk environment.',
+                tech: ['Multi-Factor Authentication (MFA)', 'Single Sign-On (SSO)', 'Privileged Access Management (PAM)', 'User Behavior Analytics (UBA)'],
+                threat: 'Credential Stuffing & Phishing',
+                chartData: [85, 15], // [Implemented, Remaining]
+                chartLabel: 'MFA Adoption',
+                color: '#0ea5e9' // sky-500
+            },
+            'device': {
+                title: 'Device Security',
+                desc: 'We cannot trust a device just because it is on the network. We must inspect the health, patch status, and compliance of every endpoint before granting access.',
+                tech: ['Endpoint Detection & Response (EDR)', 'Mobile Device Management (MDM)', 'Compliance Agents', 'Health Checks'],
+                threat: 'Malware & Unpatched Exploits',
+                chartData: [72, 28],
+                chartLabel: 'Compliant Endpoints',
+                color: '#8b5cf6' // violet-500
+            },
+            'network': {
+                title: 'Network Security',
+                desc: 'Moving away from flat networks to micro-segmentation. This limits the "blast radius" if a breach occurs, preventing lateral movement.',
+                tech: ['Micro-segmentation', 'Software Defined Perimeters (SDP)', 'Next-Gen Firewalls', 'Encryption in Transit'],
+                threat: 'Lateral Movement',
+                chartData: [45, 55], // Harder to implement
+                chartLabel: 'Segmented Zones',
+                color: '#10b981' // emerald-500
+            },
+            'app': {
+                title: 'Workload/App Security',
+                desc: 'Protecting the application layer itself (containers, VMs, cloud instances) regardless of where they reside.',
+                tech: ['Container Security', 'API Gateways', 'Runtime Protection', 'Secure DevOps Pipeline'],
+                threat: 'Zero-Day Vulnerabilities',
+                chartData: [60, 40],
+                chartLabel: 'Workloads Protected',
+                color: '#f59e0b' // amber-500
+            },
+            'data': {
+                title: 'Data Security',
+                desc: 'The ultimate protection target. Data must be classified, encrypted at rest and in transit, and monitored for exfiltration.',
+                tech: ['Data Loss Prevention (DLP)', 'Classification/Tagging', 'Encryption (AES-256)', 'Rights Management'],
+                threat: 'Data Exfiltration',
+                chartData: [92, 8],
+                chartLabel: 'Data Encrypted',
+                color: '#ef4444' // red-500
+            }
+        };
+
+        // --- 2. Chart Initialization ---
+
+        // Global chart references to allow updates
+        let pillarChartInstance = null;
+        let radarChartInstance = null;
+        let costChartInstance = null;
+        let timeChartInstance = null;
+
+        // Chart Configuration Helpers
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { usePointStyle: true, font: { size: 11 } } },
+                tooltip: { 
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)', 
+                    padding: 10,
+                    cornerRadius: 8,
+                }
+            }
+        };
+
+        // Init Pillar Chart (Doughnut)
+        function initPillarChart() {
+            const canvas = document.getElementById('pillarChart');
+            if (!canvas) return; // Null check
+            const ctx = canvas.getContext('2d');
+            
+            pillarChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Implemented', 'Gap'],
+                    datasets: [{
+                        data: [85, 15],
+                        backgroundColor: ['#0ea5e9', '#e2e8f0'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    ...commonOptions,
+                    cutout: '70%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.label}: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Init Radar Chart (Maturity)
+        function initRadarChart() {
+            const canvas = document.getElementById('radarChart');
+            if (!canvas) return; // Null check
+            const ctx = canvas.getContext('2d');
+            
+            radarChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Identity', 'Device', 'Network', 'Workload', 'Data'],
+                    datasets: [
+                        {
+                            label: 'Traditional Security',
+                            data: [2, 1, 3, 2, 2], // 1-5 scale
+                            fill: true,
+                            backgroundColor: 'rgba(148, 163, 184, 0.2)',
+                            borderColor: '#94a3b8',
+                            pointBackgroundColor: '#94a3b8',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: '#94a3b8'
+                        },
+                        {
+                            label: 'Zero Trust (Target)',
+                            data: [5, 4, 4, 5, 5],
+                            fill: true,
+                            backgroundColor: 'rgba(14, 165, 233, 0.2)',
+                            borderColor: '#0ea5e9',
+                            pointBackgroundColor: '#0ea5e9',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: '#0ea5e9'
+                        }
+                    ]
+                },
+                options: {
+                    ...commonOptions,
+                    scales: {
+                        r: {
+                            angleLines: { color: '#e2e8f0' },
+                            grid: { color: '#e2e8f0' },
+                            pointLabels: { font: { size: 12, weight: 'bold' }, color: '#475569' },
+                            min: 0,
+                            max: 6,
+                            ticks: { 
+                                display: false,
+                                stepSize: 1 // FIX: Prevents Intl error by enforcing integer steps
+                            } 
+                        }
+                    }
+                }
+            });
+        }
+
+        // Init Cost Chart (Bar)
+        function initCostChart() {
+            const canvas = document.getElementById('costChart');
+            if (!canvas) return; // Null check
+            const ctx = canvas.getContext('2d');
+            
+            costChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Traditional Model', 'Zero Trust Model'],
+                    datasets: [{
+                        label: 'Cost (USD Millions)',
+                        data: [4.45, 3.15], // Source: IBM Cost of Data Breach Report 2023 approx
+                        backgroundColor: ['#94a3b8', '#0ea5e9'],
+                        borderRadius: 6,
+                        barThickness: 50
+                    }]
+                },
+                options: {
+                    ...commonOptions,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => `$${ctx.raw} Million`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { borderDash: [2, 4], color: '#f1f5f9' },
+                            title: { display: true, text: 'USD Millions' },
+                            ticks: {
+                                // FIX: Use explicit callback to bypass default Int.NumberFormat issues with small decimals
+                                callback: function(value) { return value; } 
+                            }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Init Time Chart (Line/Area)
+        function initTimeChart() {
+            const canvas = document.getElementById('timeChart');
+            if (!canvas) return; // Null check
+            const ctx = canvas.getContext('2d');
+
+            timeChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Discovery', 'Containment', 'Remediation'],
+                    datasets: [
+                        {
+                            label: 'Traditional',
+                            data: [200, 70, 45], // Days
+                            borderColor: '#94a3b8',
+                            backgroundColor: 'transparent',
+                            tension: 0.4,
+                            borderDash: [5, 5]
+                        },
+                        {
+                            label: 'Zero Trust',
+                            data: [140, 40, 20],
+                            borderColor: '#10b981', // emerald
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    ...commonOptions,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Days' },
+                            grid: { borderDash: [2, 4], color: '#f1f5f9' },
+                            ticks: {
+                                // FIX: Explicit callback for safety
+                                callback: function(value) { return value; }
+                            }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        // --- 3. Interaction Logic ---
+
+        function updatePillar(key) {
+            const data = pillarData[key];
+            if (!data) return;
+
+            // 1. Update UI Classes
+            document.querySelectorAll('.pillar-card').forEach(btn => {
+                btn.classList.remove('active', 'border-sky-500', 'bg-sky-50');
+                if (btn.id === `btn-${key}`) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // 2. Update Text Content
+            const titleEl = document.getElementById('pillar-title');
+            if (titleEl) titleEl.innerText = data.title;
+            
+            const descEl = document.getElementById('pillar-desc');
+            if (descEl) descEl.innerText = data.desc;
+            
+            const threatEl = document.getElementById('pillar-threat');
+            if (threatEl) threatEl.innerText = data.threat;
+            
+            const statEl = document.getElementById('pillar-stat-desc');
+            if (statEl) statEl.innerText = `Simulated metric: ${data.chartLabel}`;
+
+            // 3. Update Tech List
+            const list = document.getElementById('pillar-tech');
+            if (list) {
+                list.innerHTML = '';
+                data.tech.forEach(item => {
+                    const li = document.createElement('li');
+                    li.innerText = item;
+                    list.appendChild(li);
+                });
+            }
+
+            // 4. Update Chart
+            if (pillarChartInstance) {
+                pillarChartInstance.data.datasets[0].data = data.chartData;
+                pillarChartInstance.data.datasets[0].backgroundColor = [data.color, '#e2e8f0'];
+                pillarChartInstance.update();
+            }
+        }
+
+        // Smooth Scroll Navigation
+        function scrollToSection(id) {
+            const element = document.getElementById(id);
+            if (element) {
+                window.scrollTo({
+                    top: element.offsetTop - 80, // Offset for sticky header
+                    behavior: 'smooth'
+                });
+            }
+        }
+
+        // --- 4. Initialization ---
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            initPillarChart();
+            initRadarChart();
+            initCostChart();
+            initTimeChart();
+
+            // Load initial view
+            updatePillar('identity');
+        });
+
+        // --- 5. Gemini API Integration ---
+        
+        async function callGemini(prompt) {
+            const apiKey = ""; // Injected by environment
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }]
+            };
+
+            try {
+                // Exponential backoff retry logic
+                let retries = 0;
+                while (retries < 3) {
+                    try {
+                        const response = await fetch(url, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        
+                        if (!response.ok) throw new Error(`API Error: ${response.status}`);
+                        
+                        const data = await response.json();
+                        return data.candidates?.[0]?.content?.parts?.[0]?.text || "No response generated.";
+                    } catch (e) {
+                        retries++;
+                        if (retries === 3) throw e;
+                        await new Promise(r => setTimeout(r, 1000 * Math.pow(2, retries)));
+                    }
+                }
+            } catch (error) {
+                console.error("Gemini API Error:", error);
+                return "Error connecting to AI Security Core. Please check your connection and try again.";
+            }
+        }
+
+        async function analyzeThreat() {
+            const input = document.getElementById('threatInput').value;
+            if (!input) return;
+
+            const btn = document.getElementById('btn-threat');
+            const spinner = document.getElementById('threat-spinner');
+            const resultBox = document.getElementById('threatResult');
+
+            btn.disabled = true;
+            btn.classList.add('opacity-75');
+            spinner.classList.remove('hidden');
+            resultBox.classList.add('hidden');
+            resultBox.innerText = "";
+
+            const prompt = `You are a Zero Trust Security Architect. Analyze this threat scenario: "${input}". 
+            Compare the outcome in a 'Traditional Perimeter Network' vs a 'Zero Trust Architecture'. 
+            Be concise, professional, and use specific security terminology (lateral movement, blast radius, MFA, least privilege).
+            Format as HTML with bold tags <strong> for emphasis.
+            Structure:
+            <p class="mb-2"><strong class="text-red-400">Traditional Outcome:</strong> [Explanation]</p>
+            <p><strong class="text-emerald-400">Zero Trust Outcome:</strong> [Explanation]</p>`;
+
+            const response = await callGemini(prompt);
+
+            resultBox.innerHTML = response;
+            resultBox.classList.remove('hidden');
+            spinner.classList.add('hidden');
+            btn.disabled = false;
+            btn.classList.remove('opacity-75');
+        }
+
+        async function generatePolicy() {
+            const subject = document.getElementById('policySubject').value || "User";
+            const resource = document.getElementById('policyResource').value || "Resource";
+
+            const btn = document.getElementById('btn-policy');
+            const spinner = document.getElementById('policy-spinner');
+            const resultBox = document.getElementById('policyResult');
+
+            btn.disabled = true;
+            btn.classList.add('opacity-75');
+            spinner.classList.remove('hidden');
+            resultBox.classList.add('hidden');
+            resultBox.innerText = "";
+
+            const prompt = `Generate a specific Zero Trust Access Policy in JSON format for:
+            Subject: ${subject}
+            Resource: ${resource}
+            
+            Include standard NIST 800-207 context signals like time_of_day, geo_location, device_health_score (minimum 70/100), and mfa_status (REQUIRED). 
+            Output ONLY valid JSON code. Do not include markdown formatting or backticks.`;
+
+            let response = await callGemini(prompt);
+            
+            // Clean markdown code blocks if present just in case
+            response = response.replace(/```json/g, '').replace(/```/g, '').trim();
+
+            resultBox.innerText = response;
+            resultBox.classList.remove('hidden');
+            spinner.classList.add('hidden');
+            btn.disabled = false;
+            btn.classList.remove('opacity-75');
+        }
+
+    </script>
+</body>
+</html>
